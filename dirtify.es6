@@ -5,7 +5,7 @@
  * @version 1.0.0
  * @author Izzy Skye
  */
-export default class Dirtify {
+class Dirtify {
     /**
      * Constructor for the class
      */
@@ -57,8 +57,8 @@ export default class Dirtify {
      * @returns {string}
      */
     static get DEFAULT_STOP_MESSAGE(){
-        return "It looks like you've added some info to fields,"
-             + " are you sure you dont want to save?";
+        return "Leaving this page will result in losing unsaved changes,"
+            + " do you wish to continue";
     }
 
     /**
@@ -132,6 +132,6 @@ export default class Dirtify {
      */
     setup(){
         return this.onBeforeUnload()
-                   .filterInputs();
+            .filterInputs();
     }
 }
