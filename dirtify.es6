@@ -12,7 +12,8 @@ export default class Dirtify {
     constructor(
         inputEvents = this.constructor.DEFAULT_INPUT_EVENTS,
         inputElements = this.constructor.DEFAULT_INPUT_ELEMENTS,
-        ignoreAttribute = this.constructor.DEFAULT_IGNORE_ATTRIBUTE
+        ignoreAttribute = this.constructor.DEFAULT_IGNORE_ATTRIBUTE,
+        stopMessage = this.constructor.DEFAULT_STOP_MESSAGE
     ){
         this.dirty = false;
         this.inputs = [];
@@ -20,12 +21,13 @@ export default class Dirtify {
         this.inputEvents = inputEvents;
         this.inputElements = inputElements;
         this.ignoreAttribute = ignoreAttribute;
+        this.stopMessage = stopMessage;
     }
 
     /**
      * All the input events
      *
-     * @return array DEFAULT_INPUT_EVENTS Input events
+     * @return {[*]} DEFAULT_INPUT_EVENTS Input events
      */
     static get DEFAULT_INPUT_EVENTS(){
         return ['keyup', 'change'];
@@ -34,7 +36,7 @@ export default class Dirtify {
     /**
      * All the input element tagnames
      *
-     * @return array DEFAULT_INPUT_ELEMENTS Input element tagnames
+     * @return {[*]} DEFAULT_INPUT_ELEMENTS Input element tagnames
      */
     static get DEFAULT_INPUT_ELEMENTS(){
         return ['input', 'textarea', 'select'];
@@ -50,6 +52,16 @@ export default class Dirtify {
     }
 
     /**
+     * The stop message sent on navigating away
+     *
+     * @returns {string}
+     */
+    static get DEFAULT_STOP_MESSAGE(){
+        return "It looks like you've added some info to fields,"
+             + " are you sure you dont want to save?";
+    }
+
+    /**
      * Add the onbeforeunload event listener to the window object
      *
      * @return Dirtify
@@ -61,10 +73,8 @@ export default class Dirtify {
             if(this.dirty){
                 // Newer browsers no longer support the message, but no harm in
                 // keeping one just in case
-                let message = "It looks like you've added some info to fields,"
-                            + " are you sure you dont want to save?";
-                e.returnValue = message;
-                return message;
+                e.returnValue = this.stopMessage;
+                return this.stopMessage;
             }
         };
 
