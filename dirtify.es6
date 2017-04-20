@@ -5,7 +5,7 @@
  * @version 1.0.0
  * @author Izzy Skye
  */
-class Dirtify {
+export default class Dirtify {
     /**
      * Constructor for the class
      */
