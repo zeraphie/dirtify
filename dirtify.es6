@@ -91,7 +91,7 @@ export default class Dirtify {
                 let original = {
                     original: element.value,
                     dirty: false
-                }
+                };
 
                 this.inputs.push(original);
 
