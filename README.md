@@ -7,7 +7,7 @@ This class determines whether or not the page has any 'dirty' input fields (inpu
 I've made a demo to be tested at https://codepen.io/zephyr/pen/oWxvMW
 
 ## Usage
-This class utilizes the NodeList.prototype.forEach method, so it is recommended to include the polyfill for it prior to the when the class is loaded
+This class utilizes the NodeList.prototype.forEach method, so it is recommended to include the [polyfill](forEach.polyfill.js) for it prior to the when the class is loaded
 
 The setup is pretty basic, just follow the steps below when using ES6
 
