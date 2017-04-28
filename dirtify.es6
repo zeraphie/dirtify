@@ -3,7 +3,7 @@
  *
  * @license MIT
  * @version 1.0.0
- * @author Izzy Skye
+ * @author Izzy Skye https://github.com/zeraphie/dirtify
  */
 export default class Dirtify {
     /**
@@ -12,6 +12,9 @@ export default class Dirtify {
     constructor(
         inputEvents = this.constructor.DEFAULT_INPUT_EVENTS,
         inputElements = this.constructor.DEFAULT_INPUT_ELEMENTS,
+
+        submitEvents = this.constructor.DEFAULT_SUBMIT_EVENTS,
+
         ignoreAttribute = this.constructor.DEFAULT_IGNORE_ATTRIBUTE,
         stopMessage = this.constructor.DEFAULT_STOP_MESSAGE
     ){
@@ -20,6 +23,9 @@ export default class Dirtify {
 
         this.inputEvents = inputEvents;
         this.inputElements = inputElements;
+
+        this.submitEvents = submitEvents;
+
         this.ignoreAttribute = ignoreAttribute;
         this.stopMessage = stopMessage;
     }
@@ -43,6 +49,15 @@ export default class Dirtify {
     }
 
     /**
+     * All the submit events
+     *
+     * @return {[*]} DEFAULT_SUBMIT_EVENTS Submit events
+     */
+    static get DEFAULT_SUBMIT_EVENTS(){
+        return ['submit'];
+    }
+
+    /**
      * The attribute added to elements to be ignored
      *
      * @return string DEFAULT_IGNORE_ATTRIBUTE Ignored attribute
@@ -62,21 +77,69 @@ export default class Dirtify {
     }
 
     /**
-     * Add the onbeforeunload event listener to the window object
+     * Recursively go up through the dom until a match is found
      *
-     * @return Dirtify
+     * @param child DOM Element
+     * @param parentIdentifier tag, class, id
+     * @returns {*}
      */
-    onBeforeUnload(){
-        // This event fires just before navigating away and then displays a
-        // prompt depending on whether or not the page is 'dirty'
-        window.onbeforeunload = e => {
-            if(this.dirty){
-                // Newer browsers no longer support the message, but no harm in
-                // keeping one just in case
-                e.returnValue = this.stopMessage;
-                return this.stopMessage;
+    static closest(child, parentIdentifier){
+        while(child.parentNode){
+            child = child.parentNode;
+
+            if(
+                child.tagName === parentIdentifier
+                    ||
+                child.classList.contains(parentIdentifier)
+                    ||
+                child.getAttribute('id') === parentIdentifier
+            ){
+                return child;
             }
-        };
+        }
+
+        return null;
+}
+
+    /**
+     * The event handler for the onbeforeunload event
+     *
+     * @param e
+     * @returns {string|*}
+     */
+    onBeforeUnload(e){
+        if(this.dirty){
+            // Newer browsers no longer support the message, but no harm in
+            // keeping one just in case
+            e.returnValue = this.stopMessage;
+            return this.stopMessage;
+        }
+    }
+
+    /**
+     * Bind the onbeforeunload event listener to the window object
+     *
+     * @return {Dirtify}
+     */
+    bindBeforeUnload(){
+        if(typeof window.onbeforeunload !== 'function'){
+            // This event fires just before navigating away and then displays a
+            // prompt depending on whether or not the page is 'dirty'
+            window.onbeforeunload = this.onBeforeUnload(event);
+        }
+
+        return this;
+    }
+
+    /**
+     * Unbind the onbeforeunload event listener
+     *
+     * @returns {Dirtify}
+     */
+    unbindBeforeUnload(){
+        if(typeof window.onbeforeunload === 'function'){
+            window.onbeforeunload = null;
+        }
 
         return this;
     }
@@ -84,7 +147,7 @@ export default class Dirtify {
     /**
      * Setup the tests on the inputs to see if the page is dirty or not
      *
-     * @return Dirtify
+     * @return {Dirtify}
      */
     filterInputs(){
         // Get all fields which can be changed
@@ -120,6 +183,17 @@ export default class Dirtify {
                     }, false);
                 });
             });
+
+            // Get the corresponding form element and unbind the before unload
+            // on submit
+            let form = this.constructor.closest(element, 'form');
+            if(form){
+                this.submitEvents.forEach(event => {
+                    form.addEventListener(event, function(e){
+                        this.unbindBeforeUnload();
+                    });
+                });
+            }
         });
 
         return this;
@@ -128,10 +202,10 @@ export default class Dirtify {
     /**
      * Helper function to setup the class with relevant methods
      *
-     * @return Dirtify
+     * @return {Dirtify}
      */
     setup(){
-        return this.onBeforeUnload()
+        return this.bindBeforeUnload()
             .filterInputs();
     }
 }
